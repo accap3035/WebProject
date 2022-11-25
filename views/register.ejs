@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Register Page</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="public/css/style.css">
+
+</head>
+<body>
+    <div class="container">
+        <div class="text">User Register</div>
+        <% message.forEach( (elm) => { %>
+            <p class="error"><%= elm.msg %></p>
+        <%}) %>
+        <form action="/register" method="post">
+            <div class="data">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email">
+            </div>
+            <div class="data">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name">
+            </div>
+            <div class="data">
+                <label for="surname">Surname</label>
+                <input type="text" name="surname" id="surname">
+            </div>
+            <div class="data">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            <div class="data">
+                <label for="confirm_password">Password</label>
+                <input type="password" name="confirm_password" id="confirm_password">
+            </div>
+            <div class="btn">
+                <button type="submit">Register</button>
+            </div>
+            <div class="signup-link">
+                Already a member? <a href="/login">Sign in</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Login Page</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="public/css/style.css">
+
+</head>
+<body>
+
+    
+    <div class="container">
+        <div class="text">Login</div>
+        <%if (message) {%>
+            <div class="error"><%=message%></div>
+        <%}%>
+        <form action="/login" method="POST">
+            <div class="data">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email">
+            </div>
+            <div class="data">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password">
+            </div>
+            <div class="btn">
+                <button type="submit">Login</button>
+            </div>
+            <div class="signup-link">
+                Don't have account? You can register from  <a href="/register">Sign in</a>
+            </div>
+        </form>
+    </div>      
+</body>
+</html>
