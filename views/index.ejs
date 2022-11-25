@@ -10,12 +10,45 @@
 
 </head>
 <body>
-    <div class="container-fluid">
-        <h2>Home Page</h2>
-    </div>
-    <form action="/logout" method="post">
-        <div class="logout">
-            <button type="submit">Logout</button>
+    <h1>Job Search Platform</h1>
+    <form action="/logout" method="post" class="logout">
+        <button type="submit">Logout</button>
+    </form>
+    <form action="/search" method="post">
+        <div class="container-fluid">
+            <h2>Search</h2>
+            <input type="text" name="category" id="category" placeholder="Category">
+            <%if (result.length != 0){%> 
+                <table>
+                    <tr>
+                    <th class="tableData">Category </th>
+                    <th class="tableData">job_title </th>
+                    <th class="tableData">company_name </th>
+                    <th class="tableData">city </th>
+                    <th class="tableData">salary_offered </th>
+                    <th class="tableData">url </th>
+                    <%if (isAdmin == 1){%>
+                        <th class="tableData">Delete Vacancy </th>
+                    <%}%>
+                    </tr>
+                    <tr>
+                    <% result.forEach( (elm) => { %>
+                        <br>
+                        <td class="tableData"><%= elm.category %></td>
+                        <td class="tableData"><%= elm.job_title %></td>
+                        <td class="tableData"><%= elm.company_name %></td>
+                        <td class="tableData"><%= elm.city %></td>
+                        <td class="tableData"><%= elm.salary_offered %></td>
+                        <td><a href="<%= elm.url%>">Job Link</td>
+                        <%if (isAdmin == 1){%>
+                            <td><a href="/delete/<%=elm.id%>">Delete</td>
+                        <%}%>
+                        <br>
+                    <%}) %> 
+                    </tr>
+                </table> 
+                
+            <%} %>
         </div>
     </form>
 </body>

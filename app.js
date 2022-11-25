@@ -39,41 +39,6 @@ let registerErrors = []
 let loginErrors = ''
 let jobs = []
 
-// app.get('/', (req, res) => {
-//     if (req.session.isAuth) {
-//         let current_user = req.cookies.current_user
-//         let sql = `select * from products`
-//         conn.query(sql, (err, result) => {
-//             res.render('index', {username: current_user.username, products: result})
-//         })
-
-//     }
-//     else{
-//         res.redirect('login')
-//     }
-// })
-
-// app.post('/', (req, res) => {
-//     if (req.session.isAuth) {
-//         let current_user = req.cookies.current_user
-//         let product_code = req.body.product_code
-//         let product_count = Number(req.body.product_count)
-//         let productSql = ``
-//         if (product_count == 0) {
-//             productSql = `select * from products where productCode = ?`
-//         }
-//         else {
-//             productSql = `select * from products where productCode = ? limit ?`
-//         }
-//         conn.query(productSql, [product_code, product_count], function(err, result) {
-//             res.render('index', {username: current_user.username, products: result})
-//         })
-//     }
-//     else{
-//         res.redirect('login')
-//     }
-// })
-
 app.get('/register', (req, res) => {
     res.render('register', {message: registerErrors})
 })
@@ -82,7 +47,7 @@ app.post('/register',
 body('name').trim().escape().isAlpha().withMessage('Username should be letters only'),
 body('surname').trim().escape().isAlpha().withMessage('Surname should be letters only'),
 body('email').trim().escape().isEmail().withMessage('Invalid email'),
-body('number').trim().escape(),//.matches('/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{9}$/im').withMessage('Number is incorrect'),
+body('number').trim().escape(),
 body('password').trim().escape().isLength({min: 8}).withMessage('Password should be min 8 chars').matches('[0-9]').withMessage('Password must contain a number').matches('[A-Z]').withMessage('Password must contain an uppercase letter'),
 body('confirmPassword').trim().escape().custom((value, {req}) => {
     if(value === req.body.password) return true
@@ -114,20 +79,22 @@ body('confirmPassword').trim().escape().custom((value, {req}) => {
 app.get('/login', (req, res) => {
     res.render('login', {message: loginErrors})
 })
-
+var indexResult = [];
 app.post('/login', (req, res) => {
     let {email, password} = req.body;
-    query3 = `SELECT password from users where email = ?`
+    query3 = `SELECT password,isAdmin from users where email = ?`
     query4 = `SELECT count(*) as total from users where email = ?`
     conn.query(query4, [email], (err, result) => {
         if (result[0].total > 0){
             conn.query(query3, [email], (err, result) => {
                 let passwordDb = result[0].password;
+                var isAdmin = result[0].isAdmin;
                 bcrypt.compare(password, passwordDb).then(function(result){
                     if (result){
                         req.session.isAuth = true
+                        req.session.isAdmin = isAdmin;
                         res.cookie('current_user', {username: email}, {maxAge: 30000})
-                        res.redirect("index");
+                        res.redirect("index",302,{result:indexResult});
                     }
                     else {
                         res.render('login', {message: 'Credentials are incorrect'})
@@ -147,45 +114,33 @@ app.post('/logout', (req, res) => {
       res.redirect('login');
     });
 });
+
+app.post("/search",(req,res)=>{
+    console.log(req.body.category);
+    var query = `SELECT * FROM jobs WHERE category like "%${req.body.category}%" LIMIT 2;`
+    conn.execute(query,(err,response)=>{
+        if (err) throw err;
+        indexResult=response;
+        res.redirect("index",302,{result:indexResult})
+    });
+    
+});
+
 app.get("/index",(req,res)=>{
     if(req.session.isAuth){
-        res.render("index");
+        res.render("index",{result:indexResult,isAdmin:req.session.isAdmin});
     }else{
-        res.redirect('login', 304, {message: "Error"})
+        res.redirect('login', 304, {message: "Error",result:indexResult})
     }
 });
 
-
-app.get('/update/:id', (req, res) => {
-    if (req.session.isAuth){
-        let id = req.params.id
-        res.render('update', {id: id})
-    }
-    else {
-        res.redirect('/login')
-    }
-
-})
-
-app.post('/update/:id', (req, res) => {
-    if (req.session.isAuth){
-        let {name, price} = req.body
-        let id = req.params.id
-        let updateProductSql = `UPDATE products set name = ?, price = ? where productID = ?`
-        conn.query(updateProductSql, [name, price, id], (err, result) => {
-            res.redirect('/')
-        })
-    }
-    else {
-        res.redirect('/login')
-    }
-})
 app.get('/delete/:id', (req, res) => {
     if (req.session.isAuth){
+        console.log(req.body)
         let id = req.params.id
-        let deleteProductSql = `DELETE from products where productID = ?`
+        let deleteProductSql = `DELETE from jobs where id = ?`
         conn.query(deleteProductSql, [id], (err, result) => {
-            res.redirect('/')
+            res.redirect("/index",302,{result:indexResult})
         })
     }
     else {
@@ -193,7 +148,13 @@ app.get('/delete/:id', (req, res) => {
     }
 })
 
-
+app.get("/*",(req,res)=>{
+    if(req.session.isAuth){
+        res.render("index",{result:indexResult,isAdmin:req.session.isAdmin});
+    }else{
+        res.redirect('login', 304, {message: "Error",result:indexResult})
+    }
+});
 app.listen(3000,(err)=>{
     if(err) throw err;
     console.log("Server started at http:/localhost:3000/");

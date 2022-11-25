@@ -121,7 +121,7 @@ form .signup-link a:hover{
    
 
 .container-fluid{
-  width: 600px;
+  width: 1600px;
   display: flex;
   flex-direction: column;
   align-items: center
@@ -168,4 +168,17 @@ nav .menu a:hover{
   font-weight: bold;
   text-align: center;
   padding: 10px;
+}
+
+.logout {
+  width: 200px;
+  font-size: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  top : 40px;
+  right : 100px;
+}
+.tableData{
+  margin: 4px;
 }

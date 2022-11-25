@@ -11,14 +11,11 @@
 </head>
 <body>
     <div class="container">
-        <div class="text">User Register</div>
-        <% message.forEach( (elm) => { %>
-            <p class="error"><%= elm.msg %></p>
-        <%}) %>
-        <form action="/register" method="post">
+        <div class="text">Job Update</div>
+        <form action="/jobUpdate" method="post">
             <div class="data">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email">
+                <label for="Category">Category</label>
+                <input type="text" name="Category" id="Category">
             </div>
             <div class="data">
                 <label for="name">Name</label>
