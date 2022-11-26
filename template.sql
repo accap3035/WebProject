@@ -29,3 +29,13 @@ create table if not exists users (
     number text not null,
     password text not null
 );
+
+create table if not exists saved_jobs(
+    id  int not null AUTO_INCREMENT PRIMARY KEY,
+    jobID int not null,
+    userID int not null,
+    CONSTRAINT fk_users
+    FOREIGN KEY(userID) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_jobs
+    FOREIGN KEY(jobID) REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE
+);

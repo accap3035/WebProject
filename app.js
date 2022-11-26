@@ -82,17 +82,19 @@ app.get('/login', (req, res) => {
 var indexResult = [];
 app.post('/login', (req, res) => {
     let {email, password} = req.body;
-    query3 = `SELECT password,isAdmin from users where email = ?`
+    query3 = `SELECT id,password,isAdmin from users where email = ?`
     query4 = `SELECT count(*) as total from users where email = ?`
     conn.query(query4, [email], (err, result) => {
         if (result[0].total > 0){
             conn.query(query3, [email], (err, result) => {
                 let passwordDb = result[0].password;
                 var isAdmin = result[0].isAdmin;
+                var userID = result[0].id;
                 bcrypt.compare(password, passwordDb).then(function(result){
                     if (result){
                         req.session.isAuth = true
                         req.session.isAdmin = isAdmin;
+                        req.session.userID = userID;
                         res.cookie('current_user', {username: email}, {maxAge: 30000})
                         res.redirect("index",302,{result:indexResult});
                     }
@@ -107,7 +109,9 @@ app.post('/login', (req, res) => {
 })
 
 app.post('/logout', (req, res) => {
-    req.session.isAuth = false
+    req.session.isAuth = false;
+    req.session.isAdmin = false;
+    indexResult = [];
     res.clearCookie('connect.sid')
     res.clearCookie('current_user')
     req.session.destroy(function (err) {
@@ -116,14 +120,12 @@ app.post('/logout', (req, res) => {
 });
 
 app.post("/search",(req,res)=>{
-    console.log(req.body.category);
-    var query = `SELECT * FROM jobs WHERE category like "%${req.body.category}%" LIMIT 2;`
+    var query = `SELECT * FROM jobs WHERE category like "%${req.body.category}%" limit ${req.body.count};`
     conn.execute(query,(err,response)=>{
         if (err) throw err;
         indexResult=response;
         res.redirect("index",302,{result:indexResult})
     });
-    
 });
 
 app.get("/index",(req,res)=>{
@@ -136,7 +138,6 @@ app.get("/index",(req,res)=>{
 
 app.get('/delete/:id', (req, res) => {
     if (req.session.isAuth){
-        console.log(req.body)
         let id = req.params.id
         let deleteProductSql = `DELETE from jobs where id = ?`
         conn.query(deleteProductSql, [id], (err, result) => {
@@ -147,7 +148,20 @@ app.get('/delete/:id', (req, res) => {
         res.redirect('/login')
     }
 })
-
+app.get('/save/:id', (req, res) => {
+    if (req.session.isAuth){
+        let jobID = req.params.id
+        let userID = req.session.userID;
+        let saveSQL = `INSERT INTO saved_jobs (userID,jobID) VALUES(?,?)`;
+        conn.execute(saveSQL,[userID,jobID],(err,response)=>{
+            if(err) throw err;
+            res.redirect("/index",302,{result:indexResult})
+        });   
+    }
+    else {
+        res.redirect('/login')
+    }
+})
 app.get("/*",(req,res)=>{
     if(req.session.isAuth){
         res.render("index",{result:indexResult,isAdmin:req.session.isAdmin});
