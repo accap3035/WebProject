@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+</head>
+<body>
+    <h1>Job Search Platform</h1>
+    <form action="/index">
+        <button type="submit">Back to Index</button>
+    </form>
+    <div class="container-fluid">
+        <h2>Saved Jobs</h2>
+        <%if (result.length != 0){%> 
+            <table>
+                <tr>
+                <th>Id</th>
+                <th >Category </th>
+                <th >job_title </th>
+                <th >company_name </th>
+                <th >city </th>
+                <th >salary_offered </th>
+                <th >url </th>
+                <th >Remove</th>
+
+                </tr>
+
+                <% result.forEach( (elm) => { %>
+                <tr>
+                    <td><%= elm.id%></td>
+                    <td ><%= elm.category %></td>
+                    <td><%= elm.job_title %></td>
+                    <td ><%= elm.company_name %></td>
+                    <td ><%= elm.city %></td>
+                    <td ><%= elm.salary_offered %></td>
+                    <td><a href="<%= elm.url%>">Job Link</td>
+                    <form action="/remove/<%= elm.id%>" method="post">
+                        <td><button>Remove</button></td>
+                    </form>
+                    
+                </tr>
+                <%}) %> 
+            </table> 
+            
+        <%} %>
+    </div>
+</body>
+</html>
+

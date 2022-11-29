@@ -17,7 +17,7 @@ app.use(cookieParser())
 
 app.use(session({
     secret: "webFinalProject",
-    cookie: {maxAge: 30000},
+    cookie: {maxAge: 30000000},
     resave: false,
     saveUninitialized: false
 }))
@@ -112,6 +112,7 @@ app.post('/logout', (req, res) => {
     req.session.isAuth = false;
     req.session.isAdmin = false;
     indexResult = [];
+    savedJobs = [];
     res.clearCookie('connect.sid')
     res.clearCookie('current_user')
     req.session.destroy(function (err) {
@@ -130,7 +131,7 @@ app.post("/search",(req,res)=>{
 
 app.get("/index",(req,res)=>{
     if(req.session.isAuth){
-        res.render("index",{result:indexResult,isAdmin:req.session.isAdmin});
+        res.render("index",{result:indexResult,isAdmin:req.session.isAdmin,userID:req.session.userID});
     }else{
         res.redirect('login', 304, {message: "Error",result:indexResult})
     }
@@ -141,6 +142,14 @@ app.get('/delete/:id', (req, res) => {
         let id = req.params.id
         let deleteProductSql = `DELETE from jobs where id = ?`
         conn.query(deleteProductSql, [id], (err, result) => {
+            for( var i = 0; i < indexResult.length; i++){ 
+    
+                if ( indexResult[i].id == id) { 
+            
+                    indexResult.splice(i, 1); 
+                }
+            
+            }
             res.redirect("/index",302,{result:indexResult})
         })
     }
@@ -152,17 +161,67 @@ app.get('/save/:id', (req, res) => {
     if (req.session.isAuth){
         let jobID = req.params.id
         let userID = req.session.userID;
-        let saveSQL = `INSERT INTO saved_jobs (userID,jobID) VALUES(?,?)`;
-        conn.execute(saveSQL,[userID,jobID],(err,response)=>{
-            if(err) throw err;
-            res.redirect("/index",302,{result:indexResult})
-        });   
+        let checkSQL = `SELECT * from saved_jobs where jobID=? and userID=?;`
+        let saveSQL = `INSERT INTO saved_jobs (userID,jobID) VALUES(?,?);`;
+        conn.execute(checkSQL, [jobID,userID],(err,result)=>{
+            if(result.length > 0){
+                conn.execute(saveSQL,[userID,jobID],(err,response)=>{
+                    if(err) throw err;
+                    res.redirect("/index",302,{result:indexResult})
+                });
+            }else{
+                res.redirect("/index",302,{result:indexResult})
+            }
+        })
+           
     }
     else {
         res.redirect('/login')
     }
 })
-app.get("/*",(req,res)=>{
+var savedJobs = []
+app.get('/listSaved', (req, res) => {
+    if (req.session.isAuth){
+        savedJobs = [];
+        let userID = req.session.userID;
+        console.log(userID)
+        let saveSQL = `SELECT jobID FROM saved_jobs WHERE userID=?`;
+        conn.execute(saveSQL,[userID],(err,response)=>{
+            if(err) throw err;
+            response.forEach((element)=>{
+                let getJobSql = `SELECT id,category,job_title,company_name,city,salary_offered,url FROM jobs where id=?`;
+                conn.execute(getJobSql,[element.jobID],(err,response2)=>{
+                    savedJobs.push(response2[0])
+                })
+            })
+        });   
+        res.redirect("/saved",302,{result:savedJobs})
+    }
+    else {
+        res.redirect('/login')
+    }
+})
+app.get("/saved",(req,res)=>{
+    if(req.session.isAuth){
+        res.render("saved",{result:savedJobs});
+    }
+    else {
+        res.redirect('/login')
+    }
+});
+app.post('/remove/:id', (req, res) => {
+    if (req.session.isAuth){
+        let finJobId = `DELETE FROM saved_jobs WHERE jobID=?`
+        conn.query(finJobId, [req.params.id], (err, result) => {
+            console.log(result);
+        });
+        res.redirect("/listSaved");
+    }
+    else {
+        res.redirect('/login')
+    }
+})
+app.get("/",(req,res)=>{
     if(req.session.isAuth){
         res.render("index",{result:indexResult,isAdmin:req.session.isAdmin});
     }else{
