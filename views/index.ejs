@@ -6,22 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <style>
+        .container{
+            width: 200px;
+            text-align: center;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Job Search Platform</h1>
+    <h1 style="text-align: center;">Job Search Platform</h1>
     <form action="/logout" method="post" class="logout">
-        <button type="submit">Logout</button>
+        <div class="container">
+
+            <button type="submit">Logout</button>
+        </div>
     </form>
     <form action="/listSaved" method="get" class="listSaved">
-        <button type="submit">List Your Saved Jobs</button>
+        <div class="container">
+            <button type="submit">List Your Saved Jobs</button>
+        </div>
     </form>
+    <%if (isAdmin==1){%>
+        <form action="/listUsers" method="get" class="listUsers">
+            <div class="container">
+                <button type="submit">List Users</button>
+            </div>
+        </form>
+    <%}%>
     <form action="/search" method="post">
         <div class="container-fluid">
             <h2>Search</h2>
             <input type="text" name="category" id="category" placeholder="Category">
             <br>
             <input type="number" name="count" id="count" placeholder="Count">
-            <button>Search</button>
+            <div class="container">
+
+                <button>Search</button>
+            </div>
             <%if (result.length != 0){%> 
                 <table>
                     <tr>

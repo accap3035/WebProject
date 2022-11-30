@@ -11,6 +11,11 @@
             width: 200px;
             text-align: center;
         }
+        .container2{
+            width: 200px;
+            text-align: center;
+            text-decoration: green;
+        }
     </style>
 </head>
 <body>
@@ -21,32 +26,31 @@
         </div>
     </form>
     <div class="container-fluid">
-        <h2>Saved Jobs</h2>
+        <h2>Users</h2>
+        <%if (message){%>
+            <div class="container2">
+                <p class="succes"><%= message%></p>
+                
+            </div>
+        <%}%>
         <%if (result.length != 0){%> 
             <table>
                 <tr>
-                <th>Id</th>
-                <th >Category </th>
-                <th >job_title </th>
-                <th >company_name </th>
-                <th >city </th>
-                <th >salary_offered </th>
-                <th >url </th>
-                <th >Remove</th>
-
+                <th> Id</th>
+                <th >Name </th>
+                <th >Surname </th>
+                <th >Email </th>
+                <th >Make Admin</th>
                 </tr>
 
                 <% result.forEach( (elm) => { %>
                 <tr>
                     <td><%= elm.id%></td>
-                    <td ><%= elm.category %></td>
-                    <td><%= elm.job_title %></td>
-                    <td ><%= elm.company_name %></td>
-                    <td ><%= elm.city %></td>
-                    <td ><%= elm.salary_offered %></td>
-                    <td><a href="<%= elm.url%>">Job Link</td>
-                    <form action="/remove/<%= elm.id%>" method="post">
-                        <td><button>Remove</button></td>
+                    <td ><%= elm.name %></td>
+                    <td><%= elm.surname %></td>
+                    <td ><%= elm.email %></td>
+                    <form action="/makeAdmin/<%= elm.id%>" method="post">
+                        <td><button>Make Admin</button></td>
                     </form>
                     
                 </tr>

@@ -161,12 +161,14 @@ app.get('/save/:id', (req, res) => {
     if (req.session.isAuth){
         let jobID = req.params.id
         let userID = req.session.userID;
+        console.log(jobID,userID);
         let checkSQL = `SELECT * from saved_jobs where jobID=? and userID=?;`
         let saveSQL = `INSERT INTO saved_jobs (userID,jobID) VALUES(?,?);`;
         conn.execute(checkSQL, [jobID,userID],(err,result)=>{
-            if(result.length > 0){
+            if(!result.length > 0){
                 conn.execute(saveSQL,[userID,jobID],(err,response)=>{
                     if(err) throw err;
+                    console.log("Saved to database");
                     res.redirect("/index",302,{result:indexResult})
                 });
             }else{
@@ -180,6 +182,7 @@ app.get('/save/:id', (req, res) => {
     }
 })
 var savedJobs = []
+var users = []
 app.get('/listSaved', (req, res) => {
     if (req.session.isAuth){
         savedJobs = [];
@@ -201,6 +204,32 @@ app.get('/listSaved', (req, res) => {
         res.redirect('/login')
     }
 })
+var message = ""
+app.get('/listUsers', (req, res) => {
+    if (req.session.isAuth){
+        users = [];
+        let usersSQL = `SELECT * FROM users where isAdmin=0`;
+        conn.execute(usersSQL,(err,response)=>{
+            if(err) throw err;
+            response.forEach((elm)=>{
+                users.push(elm);
+            });
+        });   
+        res.redirect("/users")
+    }
+    else {
+        res.redirect('/login')
+    }
+})
+app.get("/users",(req,res)=>{
+    if(req.session.isAuth){
+        res.render("users",{result:users,message:message});
+    }
+    else {
+        res.redirect('/login')
+    }
+    message=""
+});
 app.get("/saved",(req,res)=>{
     if(req.session.isAuth){
         res.render("saved",{result:savedJobs});
@@ -209,6 +238,18 @@ app.get("/saved",(req,res)=>{
         res.redirect('/login')
     }
 });
+app.post('/makeAdmin/:id', (req, res) => {
+    if (req.session.isAuth){
+        let finJobId = `UPDATE users set isAdmin=1 where id=?`
+        conn.query(finJobId,[req.params.id], (err, result) => {
+            message = `User is made admin`
+        });
+        res.redirect("/listUsers");
+    }
+    else {
+        res.redirect('/login')
+    }
+})
 app.post('/remove/:id', (req, res) => {
     if (req.session.isAuth){
         let finJobId = `DELETE FROM saved_jobs WHERE jobID=?`
